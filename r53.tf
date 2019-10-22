@@ -1,6 +1,11 @@
+data "aws_route53_zone" "selected" {
+  name         = var.domain
+  private_zone = false
+}
+
 resource "aws_route53_record" "domain_amazonses_verification_record" {
-  count   = var.zone_id != null ? 1 : 0
-  zone_id = var.zone_id
+  count   = data.aws_route53_zone.selected.zone_id != null ? 1 : 0
+  zone_id = data.aws_route53_zone.selected.zone_id
   name    = "_amazonses.${var.domain}"
   type    = "TXT"
   ttl     = "3600"
@@ -8,8 +13,8 @@ resource "aws_route53_record" "domain_amazonses_verification_record" {
 }
 
 resource "aws_route53_record" "domain_amazonses_dkim_record" {
-  count   = var.zone_id != null ? 3 : 0
-  zone_id = var.zone_id
+  count   = data.aws_route53_zone.selected.zone_id != null ? 3 : 0
+  zone_id = data.aws_route53_zone.selected.zone_id
   name    = "${element(aws_ses_domain_dkim.dkim.dkim_tokens, count.index)}._domainkey.${var.domain}"
   type    = "CNAME"
   ttl     = "3600"
